@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rooky SEO Analyzer</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232a78d6'/%3E%3Cpath d='M9 22l5-6 4 3 6-9' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" id="homeLink" aria-label="Inicio">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" width="28" height="28"><rect width="32" height="32" rx="8" fill="var(--series-1)"/><path d="M9 22l5-6 4 3 6-9" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </span>
+      <span>Rooky <strong>SEO</strong></span>
+    </a>
+    <div class="topbar-actions">
+      <button class="btn ghost" id="historyBtn" type="button">Historial</button>
+      <button class="btn ghost" id="settingsBtn" type="button" title="Ajustes y API keys">Ajustes</button>
+      <button class="btn ghost icon" id="themeBtn" type="button" title="Cambiar tema" aria-label="Cambiar tema"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg></button>
+    </div>
+  </header>
+
+  <main id="app">
+    <!-- Vista de inicio -->
+    <section id="startView" class="view">
+      <div class="hero">
+        <h1>Análisis SEO completo de cualquier web</h1>
+        <p class="lead">Auditoría técnica, keywords, enlaces y backlinks, preparación para buscadores con IA y comparación con tu competencia. Se ejecuta en tu ordenador.</p>
+        <form id="analyzeForm" class="card form-card" autocomplete="off">
+          <div class="field-row">
+            <label class="field grow">
+              <span>Sitio web a analizar</span>
+              <input id="urlInput" name="url" type="text" placeholder="https://www.tudominio.com" required>
+            </label>
+            <label class="field">
+              <span>Mercado</span>
+              <select id="locationSelect" name="location"></select>
+            </label>
+          </div>
+          <label class="field">
+            <span>Competidores (hasta 5, separados por comas o saltos de línea)</span>
+            <textarea id="competitorsInput" name="competitors" rows="2" placeholder="competidor1.com, competidor2.com"></textarea>
+            <small class="hint">Si los dejas vacíos y tienes DataForSEO configurado, se detectan automáticamente tus competidores orgánicos.</small>
+          </label>
+          <details class="advanced">
+            <summary>Opciones avanzadas</summary>
+            <div class="grid-4">
+              <label class="field"><span>Páginas máx. (tu sitio)</span><input type="number" id="maxPages" min="1" max="2000" value="60"></label>
+              <label class="field"><span>Páginas máx. (cada competidor)</span><input type="number" id="competitorPages" min="1" max="500" value="20"></label>
+              <label class="field"><span>Profundidad máx.</span><input type="number" id="maxDepth" min="1" max="20" value="5"></label>
+              <label class="field"><span>Peticiones simultáneas</span><input type="number" id="concurrency" min="1" max="16" value="4"></label>
+            </div>
+            <div class="checks">
+              <label><input type="checkbox" id="respectRobots" checked> Respetar robots.txt</label>
+              <label><input type="checkbox" id="checkExternal" checked> Verificar enlaces externos</label>
+              <label><input type="checkbox" id="pagespeed" checked> Core Web Vitals (PageSpeed)</label>
+              <label><input type="checkbox" id="suggestions" checked> Ideas de keywords (Google Suggest)</label>
+              <label><input type="checkbox" id="autoCompetitors" checked> Detectar competidores (DataForSEO)</label>
+            </div>
+          </details>
+          <div class="form-actions">
+            <div id="integrationBadges" class="badges"></div>
+            <button class="btn primary big" type="submit" id="analyzeBtn">Analizar</button>
+          </div>
+          <p id="formError" class="error-text" role="alert" hidden></p>
+        </form>
+        <div class="feature-grid">
+          <div class="feature"><b>Auditoría del sitio</b><span>+50 comprobaciones técnicas y de contenido con puntuación de salud.</span></div>
+          <div class="feature"><b>Keywords</b><span>Temas principales, intención, canibalización, ideas y volúmenes (DataForSEO).</span></div>
+          <div class="feature"><b>Backlinks y enlaces</b><span>Enlazado interno, enlaces salientes, autoridad y perfil de backlinks.</span></div>
+          <div class="feature"><b>Búsqueda IA</b><span>Acceso de GPTBot, ClaudeBot, Perplexity…, llms.txt, schema y visibilidad real en respuestas IA.</span></div>
+          <div class="feature"><b>Rendimiento</b><span>Core Web Vitals de campo y laboratorio para móvil y escritorio.</span></div>
+          <div class="feature"><b>Competencia</b><span>Comparativa lado a lado y brecha de keywords con tus rivales.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Vista de progreso -->
+    <section id="progressView" class="view" hidden>
+      <div class="card progress-card">
+        <div class="progress-head">
+          <div>
+            <h2 id="progressTitle">Analizando…</h2>
+            <p class="muted" id="progressStage">Iniciando</p>
+          </div>
+          <button class="btn ghost" id="cancelBtn" type="button">Cancelar</button>
+        </div>
+        <div class="progress-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div id="progressFill"></div></div>
+        <pre id="progressLog" class="log" aria-live="polite"></pre>
+      </div>
+    </section>
+
+    <!-- Vista de informe -->
+    <section id="reportView" class="view" hidden>
+      <aside class="sidebar">
+        <div class="sidebar-domain">
+          <div class="muted small">Proyecto</div>
+          <div id="sidebarDomain" class="domain-name"></div>
+          <div id="sidebarDate" class="muted small"></div>
+        </div>
+        <nav id="tabs" class="tabs" aria-label="Secciones del informe"></nav>
+        <div class="sidebar-actions">
+          <button class="btn ghost small" id="exportJson" type="button">Exportar JSON</button>
+          <button class="btn ghost small" id="printBtn" type="button">Imprimir / PDF</button>
+          <button class="btn ghost small" id="reanalyzeBtn" type="button">Volver a analizar</button>
+        </div>
+      </aside>
+      <div id="tabContent" class="tab-content"></div>
+    </section>
+  </main>
+
+  <!-- Ajustes -->
+  <dialog id="settingsDialog" class="dialog">
+    <form method="dialog" class="dialog-body" id="settingsForm">
+      <h2>Ajustes y API keys</h2>
+      <p class="muted">Todo funciona sin claves. Las claves desbloquean datos de terceros (backlinks reales, volúmenes de búsqueda, autoridad y visibilidad en IA). Se guardan solo en este navegador y se envían únicamente a tu servidor local. También puedes definirlas en el archivo <code>.env</code>.</p>
+      <fieldset>
+        <legend>Google PageSpeed Insights <span class="tag">gratis</span></legend>
+        <label class="field"><span>API key de Google</span><input type="password" id="googleApiKey" placeholder="AIza…"></label>
+        <small class="hint">Sin clave funciona con una cuota muy limitada. Créala en Google Cloud Console → API "PageSpeed Insights".</small>
+      </fieldset>
+      <fieldset>
+        <legend>OpenPageRank <span class="tag">gratis</span></legend>
+        <label class="field"><span>API key</span><input type="password" id="oprApiKey"></label>
+        <small class="hint">Autoridad de dominio (0-10) basada en enlaces. Regístrate en openpagerank.com.</small>
+      </fieldset>
+      <fieldset>
+        <legend>DataForSEO <span class="tag">de pago</span></legend>
+        <div class="grid-2">
+          <label class="field"><span>Login (email)</span><input type="text" id="dataforseoLogin"></label>
+          <label class="field"><span>Password de API</span><input type="password" id="dataforseoPassword"></label>
+        </div>
+        <small class="hint">Backlinks, dominios de referencia, keywords posicionadas, tráfico estimado, volúmenes y dificultad. Se cobra por consulta (céntimos por análisis).</small>
+      </fieldset>
+      <fieldset>
+        <legend>Anthropic (Claude) <span class="tag">de pago</span></legend>
+        <label class="field"><span>API key</span><input type="password" id="anthropicApiKey" placeholder="sk-ant-…"></label>
+        <label class="field"><span>Modelo</span><select id="aiModel"></select></label>
+        <small class="hint">Mide si tu marca aparece y es citada en respuestas de IA con búsqueda web, frente a tus competidores.</small>
+      </fieldset>
+      <div id="envStatus" class="muted small"></div>
+      <div class="dialog-actions">
+        <button class="btn ghost" value="cancel" type="button" id="settingsCancel">Cerrar</button>
+        <button class="btn primary" value="save" type="submit">Guardar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Historial -->
+  <dialog id="historyDialog" class="dialog">
+    <div class="dialog-body">
+      <h2>Informes guardados</h2>
+      <div id="historyList"></div>
+      <div class="dialog-actions"><button class="btn ghost" type="button" id="historyClose">Cerrar</button></div>
+    </div>
+  </dialog>
+
+  <!-- Detalle de página -->
+  <dialog id="pageDialog" class="dialog wide">
+    <div class="dialog-body" id="pageDialogBody"></div>
+  </dialog>
+
+  <div id="tooltip" class="tooltip" hidden></div>
+
+  <script src="/vendor/chart.umd.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

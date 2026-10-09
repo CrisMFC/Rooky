@@ -1,0 +1,21 @@
+{
+  "name": "rooky-seo-analyzer",
+  "version": "1.0.0",
+  "description": "Herramienta local de análisis SEO estilo Semrush: auditoría técnica, keywords, backlinks, visibilidad en buscadores IA y competencia.",
+  "main": "server.js",
+  "type": "commonjs",
+  "private": true,
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20.18.1"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.133.0",
+    "chart.js": "^4.5.1",
+    "cheerio": "^1.2.0",
+    "express": "^5.3.0"
+  }
+}
